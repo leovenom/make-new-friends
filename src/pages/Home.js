@@ -30,9 +30,6 @@ const Home = () => {
             <li>
               <Link to="/help">Help</Link>
             </li>
-            <li>
-              <Link to="/more">Help</Link>
-            </li>
           </ul>
         </nav>
       </header>
