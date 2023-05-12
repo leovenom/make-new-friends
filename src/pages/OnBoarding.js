@@ -1,5 +1,5 @@
 const OnBoarding = () => {
-  return <div></div>;
+  return <div>OnBoarding</div>;
 };
 
 export default OnBoarding;

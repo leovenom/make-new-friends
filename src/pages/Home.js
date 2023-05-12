@@ -1,53 +1,39 @@
-import { Link } from "react-router-dom";
+import Nav from "../components/Nav";
+import AuthModal from "../components/AuthModal";
+import { useState } from "react";
 
 const Home = () => {
+  const [showModal, setShowModal] = useState(false);
+
+  const [isSignUp, setIsSignUp] = useState(true);
+
+  const authToken = false;
+
+  const handleCLick = () => {
+    console.log("clicked");
+    setShowModal(true);
+    setIsSignUp(true);
+  };
+
   return (
-    <div>
-      <header>
-        <nav>
-          <ul>
-            <li>
-              <Link to="/">Home</Link>
-            </li>
-            <li>
-              <Link to="/signup">Sign Up</Link>
-            </li>
-            <li>
-              <Link to="/login">Log In</Link>
-            </li>
-            <li>
-              <Link to="/profile">Profile</Link>
-            </li>
-            <li>
-              <Link to="/messages">Messages</Link>
-            </li>
-            <li>
-              <Link to="/events">Events</Link>
-            </li>
-            <li>
-              <Link to="/forum">Forum</Link>
-            </li>
-            <li>
-              <Link to="/help">Help</Link>
-            </li>
-          </ul>
-        </nav>
-      </header>
-      <main>
-        <h1>Welcome to our friendly platform for couples</h1>
-        <p>
-          Making friends after 25 can be tough, especially for couples looking
-          to connect with other couples. But with our platform, you can easily
-          connect with other couples in your area who share similar interests.
-          We make it easier to make new friends and build lasting relationships.
-        </p>
-        <button>
-          <Link to="/signup">Get Started</Link>
+    <div className="overlay">
+      <Nav
+        minimal={false}
+        authToken={authToken}
+        setShowModal={setShowModal}
+        showModal={showModal}
+        setIsSignUp={setIsSignUp}
+      />
+      <div className="home">
+        <h1 className="primary-title">Swipe Right</h1>
+        <button className="primary-button" onClick={handleCLick}>
+          {authToken ? "Signout" : "Create Account"}
         </button>
-      </main>
-      <footer>
-        <p>&copy; 2023 Couples Connect. All rights reserved.</p>
-      </footer>
+
+        {showModal && (
+          <AuthModal setShowModal={setShowModal} isSignUp={isSignUp} />
+        )}
+      </div>
     </div>
   );
 };
