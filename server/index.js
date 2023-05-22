@@ -99,17 +99,19 @@ app.get("/user", async (req, res) => {
   }
 });
 
-app.get("/users", async (req, res) => {
+app.get("/status-users", async (req, res) => {
   const client = new MongoClient(uri);
-  const userIds = JSON.parse(req.query.userIds);
+  const status = req.query.status;
+  // const userIds = JSON.parse(req.query.userIds);
 
   try {
     await client.connect();
     const database = client.db("app-data");
     const users = database.collection("users");
+    const query = { status_identity: { $eq: status } };
+    const foundUsers = await users.find(query).toArray();
 
-    const returnedUsers = await users.find().toArray();
-    res.send(returnedUsers);
+    res.send(foundUsers);
   } finally {
     await client.close();
   }
@@ -141,7 +143,27 @@ app.put("/user", async (req, res) => {
     };
 
     const insertedUser = await users.updateOne(query, updateDocument);
-    res.send(insertUser);
+    res.send(insertedUser);
+  } finally {
+    await client.close();
+  }
+});
+
+app.put("/addmatch", async (req, res) => {
+  const client = new MockClient(uri);
+  const { userId, matcheduserId } = req.body;
+
+  try {
+    await client.connect();
+    const database = client.db("app-data");
+    const users = database.collection("users");
+
+    const query = { user_id: userId };
+    const updateDocument = {
+      $push: { matches: { user_id: matcheduserId } },
+    };
+    const user = await users.updateOne(query, updateDocument);
+    res.send(user);
   } finally {
     await client.close();
   }

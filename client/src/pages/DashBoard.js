@@ -6,6 +6,8 @@ import axios from "axios";
 
 const DashBoard = () => {
   const [user, setUser] = useState(null);
+  const [statusUsers, setStatusUsers] = useState(null);
+  const [lastDirection, setLastDirection] = useState();
   const [cookies, setCookie, removeCookie] = useCookies(["user"]);
 
   const userId = cookies.UserId;
@@ -21,42 +23,52 @@ const DashBoard = () => {
     }
   };
 
+  const getStatusUsers = async () => {
+    try {
+      const response = await axios.get("http://localhost:8000/status-users", {
+        params: { status: user?.status_interest },
+      });
+      setStatusUsers(response.data);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   useEffect(() => {
     getUser();
-  }, []);
+    getStatusUsers();
+  }, [user, statusUsers]);
 
-  const characters = [
-    {
-      name: "Richard Hendricks",
-      url: "https://i.imgur.com/Bgv73zj.png",
-    },
-    {
-      name: "Erlich Bachman",
-      url: "https://i.imgur.com/Bgv73zj.png",
-    },
-    {
-      name: "Monica Hall",
-      url: "./img/monica.jpg",
-    },
-    {
-      name: "Jared Dunn",
-      url: "./img/jared.jpg",
-    },
-    {
-      name: "Dinesh Chugtai",
-      url: "./img/dinesh.jpg",
-    },
-  ];
-  const [lastDirection, setLastDirection] = useState();
+  const updateMaches = async (matchedUserId) => {
+    try {
+      await axios.put("http://localhost:8000/addmatch", {
+        userId,
+        matchedUserId,
+      });
+      getUser();
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
-  const swiped = (direction, nameToDelete) => {
-    console.log("removing: " + nameToDelete);
+  const swiped = (direction, swipedUserId) => {
+    if (direction === "right") {
+      updateMaches(swipedUserId);
+    }
     setLastDirection(direction);
   };
 
   const outOfFrame = (name) => {
     console.log(name + " left the screen!");
   };
+
+  const matchedUserIds = user?.matches
+    .map(({ user_id }) => user_id)
+    .concat(userId);
+
+  const filteredStatusUsers = statusUsers?.filter(
+    (statusUser) => !matchedUserIds.includes(statusUser.user_id)
+  );
 
   return (
     <>
@@ -65,18 +77,18 @@ const DashBoard = () => {
           <ChatContainer user={user} />
           <div className="swipe-container">
             <div className="card-container">
-              {characters.map((character) => (
+              {filteredStatusUsers?.map((statusUser) => (
                 <TinderCard
                   className="swipe"
-                  key={character.name}
-                  onSwipe={(dir) => swiped(dir, character.name)}
-                  onCardLeftScreen={() => outOfFrame(character.name)}
+                  key={statusUser.first_name}
+                  onSwipe={(dir) => swiped(dir, statusUser.user_id)}
+                  onCardLeftScreen={() => outOfFrame(statusUser.first_name)}
                 >
                   <div
-                    style={{ backgroundImage: "url(" + character.url + ")" }}
+                    style={{ backgroundImage: "url(" + statusUser.url + ")" }}
                     className="card"
                   >
-                    <h3>{character.name}</h3>
+                    <h3>{statusUser.first_name}</h3>
                   </div>
                 </TinderCard>
               ))}
