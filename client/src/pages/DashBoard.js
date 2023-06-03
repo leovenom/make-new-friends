@@ -68,8 +68,8 @@ const DashBoard = () => {
   };
 
   const matchedUserIds = user?.matches
-    .map(({ user_id }) => user_id)
-    .concat(userId);
+    ? user.matches.map(({ user_id }) => user_id).concat(userId)
+    : [];
 
   const filteredStatusUsers = statusUsers?.filter(
     (statusUser) => !matchedUserIds.includes(statusUser.user_id)

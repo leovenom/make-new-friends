@@ -43,7 +43,7 @@ app.post("/signup", async (req, res) => {
       hashed_password: hashedPassword,
     };
 
-    const insertedUser = users.insertOne(data);
+    const insertedUser = await users.insertOne(data);
     const token = jwt.sign(insertedUser, sanitizedEmail, {
       expiresIn: 60 * 24,
     });
@@ -78,11 +78,13 @@ app.post("/login", async (req, res) => {
       });
       res.status(201).json({ token, userId: user.user_id });
     }
-    res.status(400).send("Invalid Credentials");
+
+    res.status(400).json("Invalid Credentials");
   } catch (err) {
     console.log(err);
   } finally {
     await client.close();
+  }
 });
 
 app.get("/user", async (req, res) => {
@@ -102,10 +104,23 @@ app.get("/user", async (req, res) => {
   }
 });
 
+// app.get("/users", async (req, res) => {
+//   const client = new MongoClient(uri);
+//   try {
+//     await client.connect();
+//     const database = client.db("app-data");
+//     const users = database.collection("users");
+
+//     const returnedUsers = await users.find().toArray();
+//     res.send(returnedUsers);
+//   } finally {
+//     await client.close();
+//   }
+// });
+
 app.get("/users", async (req, res) => {
   const client = new MongoClient(uri);
   const userIds = JSON.parse(req.query.userIds);
-  console.log(userIds);
 
   try {
     await client.connect();
@@ -123,8 +138,8 @@ app.get("/users", async (req, res) => {
     ];
 
     const foundUsers = await users.aggregate(pipeline).toArray();
-    console.log(foundUsers);
-    res.send(foundUsers);
+
+    res.json(foundUsers);
   } finally {
     await client.close();
   }
