@@ -36,8 +36,13 @@ const DashBoard = () => {
 
   useEffect(() => {
     getUser();
-    getStatusUsers();
-  }, [user, statusUsers]);
+  }, []);
+
+  useEffect(() => {
+    if (user) {
+      getStatusUsers();
+    }
+  }, [user]);
 
   const updateMaches = async (matchedUserId) => {
     try {
@@ -80,7 +85,7 @@ const DashBoard = () => {
               {filteredStatusUsers?.map((statusUser) => (
                 <TinderCard
                   className="swipe"
-                  key={statusUser.first_name}
+                  key={statusUser.user_id}
                   onSwipe={(dir) => swiped(dir, statusUser.user_id)}
                   onCardLeftScreen={() => outOfFrame(statusUser.first_name)}
                 >

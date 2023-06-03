@@ -6,9 +6,9 @@ const { v4: uuidv4 } = require("uuid");
 const jwt = require("jsonwebtoken");
 const cors = require("cors");
 const bcrypt = require("bcrypt");
+require("dotenv").config();
 
-const uri =
-  "mongodb+srv://leovenom:testedb@cluster0.4gf7yle.mongodb.net/Cluster0?retryWrites=true&w=majority";
+const uri = process.env.URI;
 
 const app = express();
 app.use(cors());
@@ -51,6 +51,8 @@ app.post("/signup", async (req, res) => {
     res.status(201).json({ token, userId: generatedUserId });
   } catch (err) {
     console.log(err);
+  } finally {
+    await client.close();
   }
 });
 
@@ -79,7 +81,8 @@ app.post("/login", async (req, res) => {
     res.status(400).send("Invalid Credentials");
   } catch (err) {
     console.log(err);
-  }
+  } finally {
+    await client.close();
 });
 
 app.get("/user", async (req, res) => {
@@ -94,6 +97,34 @@ app.get("/user", async (req, res) => {
     const query = { user_id: userId };
     const user = await users.findOne(query);
     res.send(user);
+  } finally {
+    await client.close();
+  }
+});
+
+app.get("/users", async (req, res) => {
+  const client = new MongoClient(uri);
+  const userIds = JSON.parse(req.query.userIds);
+  console.log(userIds);
+
+  try {
+    await client.connect();
+    const database = client.db("app-data");
+    const users = database.collection("users");
+
+    const pipeline = [
+      {
+        $match: {
+          user_id: {
+            $in: userIds,
+          },
+        },
+      },
+    ];
+
+    const foundUsers = await users.aggregate(pipeline).toArray();
+    console.log(foundUsers);
+    res.send(foundUsers);
   } finally {
     await client.close();
   }
@@ -164,6 +195,44 @@ app.put("/addmatch", async (req, res) => {
     };
     const user = await users.updateOne(query, updateDocument);
     res.send(user);
+  } finally {
+    await client.close();
+  }
+});
+
+// Get Messages by from_userId and to_userId
+app.get("/messages", async (req, res) => {
+  const { userId, correspondingUserId } = req.query;
+  const client = new MongoClient(uri);
+
+  try {
+    await client.connect();
+    const database = client.db("app-data");
+    const messages = database.collection("messages");
+
+    const query = {
+      from_userId: userId,
+      to_userId: correspondingUserId,
+    };
+    const foundMessages = await messages.find(query).toArray();
+    res.send(foundMessages);
+  } finally {
+    await client.close();
+  }
+});
+
+// Add a Message to our Database
+app.post("/message", async (req, res) => {
+  const client = new MongoClient(uri);
+  const message = req.body.message;
+
+  try {
+    await client.connect();
+    const database = client.db("app-data");
+    const messages = database.collection("messages");
+
+    const insertedMessage = await messages.insertOne(message);
+    res.send(insertedMessage);
   } finally {
     await client.close();
   }
