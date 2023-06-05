@@ -26,7 +26,7 @@ const AuthModal = ({ setShowModal, isSignUp }) => {
       }
       console.log("posting", email, password);
       const response = await axios.post(
-        `http://localhost:8000/${isSignUp ? "signup" : "login"}`,
+        `${process.env.REACT_APP_SERVERURL}/${isSignUp ? "signup" : "login"}`,
         { email, password }
       );
 

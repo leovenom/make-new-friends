@@ -14,9 +14,12 @@ const DashBoard = () => {
 
   const getUser = async () => {
     try {
-      const response = await axios.get("http://localhost:8000/user", {
-        params: { userId },
-      });
+      const response = await axios.get(
+        `${process.env.REACT_APP_SERVERURL}/user`,
+        {
+          params: { userId },
+        }
+      );
       setUser(response.data);
     } catch (error) {
       console.log(error);
@@ -25,9 +28,12 @@ const DashBoard = () => {
 
   const getStatusUsers = async () => {
     try {
-      const response = await axios.get("http://localhost:8000/status-users", {
-        params: { status: user?.status_interest },
-      });
+      const response = await axios.get(
+        `${process.env.REACT_APP_SERVERURL}/status-users`,
+        {
+          params: { status: user?.status_interest },
+        }
+      );
       setStatusUsers(response.data);
     } catch (error) {
       console.log(error);
@@ -46,7 +52,7 @@ const DashBoard = () => {
 
   const updateMaches = async (matchedUserId) => {
     try {
-      await axios.put("http://localhost:8000/addmatch", {
+      await axios.put(`${process.env.REACT_APP_SERVERURL}/addmatch`, {
         userId,
         matchedUserId,
       });

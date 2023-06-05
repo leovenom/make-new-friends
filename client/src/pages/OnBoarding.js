@@ -26,9 +26,12 @@ const OnBoarding = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.put("http://localhost:8000/user", {
-        formData,
-      });
+      const response = await axios.put(
+        `${process.env.REACT_APP_SERVERURL}/user`,
+        {
+          formData,
+        }
+      );
       const success = response.status === 200;
       if (success) navigate("/dashboard");
     } catch (err) {
